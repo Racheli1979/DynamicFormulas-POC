@@ -2,24 +2,24 @@ use DynamicFormulasDB
 
 INSERT INTO tmp_targil (targil, tnai)
 VALUES
--- ðåñçàåú ôùåèåú
+-- × ×•×¡×—××•×ª ×¤×©×•×˜×•×ª
 ('a + b', NULL),
 ('c * 2', 'c>5'),
 ('d - e', NULL),
 ('f / 4', NULL),
 
--- ðåñçàåú îåøëáåú
+-- × ×•×¡×—××•×ª ×ž×•×¨×›×‘×•×ª ×™×•×ª×¨
 ('(a + b) * 8', 'a>5'),
 ('SQRT(POWER(c,2) + POWER(d,2))', NULL),
 ('LOG(e) + f', NULL),
 ('ABS(g - h)', NULL),
 
--- ðåñçàåú òí úðàéí
+-- × ×•×¡×—××•×ª ×¢× ×ª× ××™×
 ('CASE WHEN a > 5 THEN b*2 ELSE c/2 END', 'a > 5'),
 ('CASE WHEN d < 10 THEN e + 1 ELSE f - 1 END', 'd < 10'),
 ('CASE WHEN g = h THEN 1 ELSE 0 END', 'g = h'),
 
--- ðåñçàåú ðåñôåú
+-- × ×•×¡×—××•×ª × ×•×¡×¤×•×ª
 ('POWER(a+b,2)', NULL),                   
 ('SQRT(POWER(a-c,2) + POWER(b-d,2))', NULL),
 ('CASE WHEN e <> f THEN e*f ELSE e+f END', 'e <> f'), 

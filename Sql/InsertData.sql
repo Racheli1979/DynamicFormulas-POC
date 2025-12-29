@@ -3,7 +3,7 @@ use DynamicFormulasDB
 DECLARE @BatchSize INT = 100000;
 DECLARE @Inserted INT = 0;
 
--- δλπρϊ ξμιεο πϊεπιν ψπγεξμι
+-- Χ”Χ›Χ Χ΅Χª ΧΧΧ™Χ•Χ Χ ΧªΧ•Χ Χ™Χ Χ‘Χ¦Χ•Χ¨Χ” Χ¨Χ Χ“Χ•ΧΧΧ™Χª ΧΧΧ‘ΧΧª Χ ΧªΧ•Χ Χ™Χ
 WHILE @Inserted < 1000000
 BEGIN
     ;WITH Numbers AS (

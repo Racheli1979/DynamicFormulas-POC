@@ -116,6 +116,17 @@ python Main.py
 dotnet restore
 ```
 
+### הגדרת משתני סביבה (.env)
+צור קובץ env. והעתק לשם את הקוד הזה ושנה את DB_SERVER 
+
+```bash
+DB_SERVER=<your_server_name>
+DB_DATABASE=DynamicFormulasDB
+DB_TABLE_DATA=tmp_data
+DB_TABLE_FORMULAS=tmp_targil
+DB_TABLE_RESULTS=tmp_results
+```
+
 ### הרצה
 יש לקחת את הקוד מתוך תיקיית .Net ולהריץ:
 

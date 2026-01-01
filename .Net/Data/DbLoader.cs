@@ -1,21 +1,20 @@
-using System.Data;
-using System.Data.Odbc;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using FormulaCalculatorEF.Config;
 
-namespace Data
+namespace FormulaCalculatorEF.Data
 {
     public static class DbLoader
     {
-        public static DataTable LoadTable(string tableName)
+        public static List<DataRow> LoadData(AppDbContext context)
         {
-            using var conn = new OdbcConnection(Config.AppConfig.ConnectionString);
-            conn.Open();
+            return context.DataRow.AsNoTracking().ToList();
+        }
 
-            using var cmd = new OdbcCommand($"SELECT * FROM {tableName}", conn);
-            using var da = new OdbcDataAdapter(cmd);
-
-            var dt = new DataTable();
-            da.Fill(dt);
-            return dt;
+        public static List<Formula> LoadFormulas(AppDbContext context)
+        {
+            return context.Formulas.AsNoTracking().ToList();
         }
     }
 }

@@ -1,23 +1,25 @@
-﻿using System;
-using System.Data;
-using DotNetEnv;
-using Data;
-using FormulaEngine;
+using System;
+using System.Linq;
+using FormulaCalculatorEF.Config;
+using FormulaCalculatorEF.Data;
+using FormulaCalculatorEF.FormulaEngine;
 
-class Program
+namespace FormulaCalculatorEF
 {
-    static void Main(string[] args)
+    class Program
     {
-        DotNetEnv.Env.Load();
+        static void Main()
+        {
+            using var context = new AppDbContext();
 
-        string connStr = Config.DbConfig.GetConnectionString();
+            var dfData = DbLoader.LoadData(context);
+            var dfFormulas = DbLoader.LoadFormulas(context);
 
-        DataTable dfData = DbLoader.LoadTable(connStr, "tmp_data");
-        DataTable dfFormulas = DbLoader.LoadTable(connStr, "tmp_targil");
+            var dtResults = FormulaCalculator.CalculateResults(dfData, dfFormulas);
 
-        DataTable dtResults = FormulaCalculator.Calculate(dfData, dfFormulas);
+            DbWriter.SaveResults(context, dtResults);
 
-        DbLoader.BulkInsert(connStr, "tmp_results", dtResults);
-        Console.WriteLine("Calculation completed and results inserted.");
+            Console.WriteLine("Saved successfully!");
+        }
     }
 }

@@ -10,7 +10,10 @@ import os
 df_results = pd.read_sql(f"SELECT * FROM {os.getenv('DB_TABLE_RESULTS')}", engine)
 
 # עיבוד נתונים
-merged_all, dfs, df_clean = process_data(df_results)  # עכשיו גם df_clean מוחזר
+merged_all, dfs, df_clean = process_data(df_results)  
+
+# החלפת ערכים ששווים ל-0 ב-0.001
+df_clean.loc[df_clean['execution_time'] == 0, 'execution_time'] = 0.001
 
 # חישוב סטטיסטיקות
 stats_df = df_clean.groupby('method')['execution_time'].agg(
@@ -22,7 +25,7 @@ best_method = stats_df.loc[stats_df['median'].idxmin(), 'method']
 # יצירת גרפים
 generate_graphs(df_clean, stats_df)
 
-# יצירת טקסט ניתוח ביצועים - זה מקום שבו אתה יכול להוסיף ניתוחים, יתרונות/חסרונות והמלצות
+# יצירת טקסט יתרונות/חסרונות והמלצות
 analysis_text = """
 סיכום ביצועים של השיטות:
 

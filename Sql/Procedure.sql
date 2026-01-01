@@ -12,67 +12,30 @@ BEGIN
         execution_time FLOAT
     );
 
-    DECLARE 
-        @targil_id INT,
-        @targil_expr NVARCHAR(MAX),
-        @tnai NVARCHAR(MAX),
-        @data_id INT,
-        @res FLOAT,
-        @start DATETIME2,
-        @end DATETIME2,
-        @elapsed FLOAT,
-        @sql NVARCHAR(MAX);
+    DECLARE @sql NVARCHAR(MAX) = N'';
 
-    -- לולאה על כל התרגילים
-    DECLARE targil_cursor CURSOR FOR
-        SELECT id, targil, tnai FROM tmp_targil;
+    -- דינמי לכל התרגילים SQL יצירת
+    SELECT @sql = @sql + '
+        INSERT INTO #temp_results (data_id, targil_id, method, result, execution_time)
+        SELECT 
+            d.id AS data_id,
+            ' + CAST(t.id AS NVARCHAR(10)) + ' AS targil_id,  -- הערך של התרגיל מוכנס ישירות
+            ''DB Procedure'' AS method,
+            CAST((' + 
+                CASE 
+                    WHEN CHARINDEX('ELSE', UPPER(t.targil)) = 0 
+                    THEN 'CASE WHEN ' + ISNULL(t.tnai,'1=1') + ' THEN ' + t.targil + ' ELSE NULL END' 
+                    ELSE t.targil 
+                END
+            + ') AS FLOAT) AS result,
+            CAST(DATEDIFF(MICROSECOND, timer.start_time, SYSDATETIME())/1000000.0 AS FLOAT) AS execution_time
+        FROM tmp_data d
+        CROSS APPLY (SELECT SYSDATETIME() AS start_time) AS timer;
+    '
+    FROM tmp_targil t;
 
-    OPEN targil_cursor;
-    FETCH NEXT FROM targil_cursor INTO @targil_id, @targil_expr, @tnai;
-
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        -- בניית CASE אם אין ELSE
-        IF CHARINDEX('ELSE', UPPER(@targil_expr)) = 0
-            SET @targil_expr = 'CASE WHEN ' + ISNULL(@tnai,'1=1') + ' THEN ' + @targil_expr + ' ELSE NULL END';
-
-        -- לולאה על כל רשומה ב-tmp_data
-        DECLARE data_cursor CURSOR FOR SELECT id FROM tmp_data;
-        OPEN data_cursor;
-        FETCH NEXT FROM data_cursor INTO @data_id;
-
-        WHILE @@FETCH_STATUS = 0
-        BEGIN
-            -- מדידת זמן לפני החישוב
-            SET @start = SYSDATETIME();
-
-            -- חישוב הביטוי עם הפניה לרשומה ספציפית
-            SET @sql = '
-                SELECT @res_out = CAST((' + @targil_expr + ') AS FLOAT)
-                FROM tmp_data
-                WHERE id = ' + CAST(@data_id AS NVARCHAR);
-
-            EXEC sp_executesql @sql, N'@res_out FLOAT OUTPUT', @res_out=@res OUTPUT;
-
-            -- מדידת זמן אחרי החישוב
-            SET @end = SYSDATETIME();
-            SET @elapsed = DATEDIFF(MICROSECOND, @start, @end)/1000000.0;
-
-            -- הכנסת התוצאה לטבלה הזמנית
-            INSERT INTO #temp_results (data_id, targil_id, method, result, execution_time)
-            VALUES (@data_id, @targil_id, 'DB Procedure', @res, @elapsed);
-
-            FETCH NEXT FROM data_cursor INTO @data_id;
-        END
-
-        CLOSE data_cursor;
-        DEALLOCATE data_cursor;
-
-        FETCH NEXT FROM targil_cursor INTO @targil_id, @targil_expr, @tnai;
-    END
-
-    CLOSE targil_cursor;
-    DEALLOCATE targil_cursor;
+    -- הרצת כל החישובים בבת אחת
+    EXEC sp_executesql @sql;
 
     -- העתקת התוצאות לטבלה הקבועה
     INSERT INTO tmp_results (data_id, targil_id, method, result, execution_time)
@@ -83,5 +46,5 @@ BEGIN
 END;
 GO
 
--- הרצת הפרוצדורה
+-- הרצה
 EXEC dbo.DynamicFormulasProcedure;
